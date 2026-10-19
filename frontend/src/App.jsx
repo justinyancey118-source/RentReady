@@ -1,122 +1,148 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+
+import { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/products"
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load rental products.");
+        }
+
+        const data = await response.json();
+        setProducts(data.products);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="rentready-app">
+      <nav className="navbar navbar-expand-lg navbar-dark rentready-nav">
+        <div className="container">
+          <a className="navbar-brand fw-bold" href="/">
+            RentReady
+          </a>
+
+          <span className="navbar-text text-white">
+            Equipment & Dumpster Rentals
+          </span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+      </nav>
+
+      <header className="rentready-hero">
+        <div className="container py-5">
+          <span className="badge text-bg-light mb-3">
+            YOUR NEXT PROJECT STARTS HERE
+          </span>
+
+          <h1 className="display-4 fw-bold">
+            The right equipment.
+            <br />
+            The right project.
+          </h1>
+
+          <p className="lead mt-3">
+            Explore equipment and dumpster rentals in one place.
+          </p>
+
+          <a href="#catalog" className="btn btn-light btn-lg mt-3">
+            Explore rentals
+          </a>
+        </div>
+      </header>
+
+      <main className="container py-5" id="catalog">
+        <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+          <div>
+            <h2 className="fw-bold mb-1">Explore our rentals</h2>
+            <p className="text-secondary mb-0">
+              Find equipment for your next project.
+            </p>
+          </div>
+
+          <span className="badge text-bg-success fs-6">
+            {products.length} listings
+          </span>
+        </div>
+
+        {loading && (
+          <div className="text-center py-5" role="status">
+            <div className="spinner-border text-success" />
+            <p className="mt-3">Loading rental products...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && products.length === 0 && (
+          <div className="alert alert-info">
+            No rental products are listed yet.
+          </div>
+        )}
+
+        {!loading && !error && products.length > 0 && (
+          <div className="row g-4">
+            {products.map((product) => (
+              <div className="col-12 col-md-6 col-lg-4" key={product._id}>
+                <article className="card h-100 shadow-sm rental-card">
+                  <div className="rental-image-placeholder">
+                    <span aria-hidden="true">
+                      {product.category === "dumpster" ? "🗑️" : "🛠️"}
+                    </span>
+                  </div>
+
+                  <div className="card-body d-flex flex-column">
+                    <span className="badge text-bg-success align-self-start mb-2">
+                      {product.category}
+                    </span>
+
+                    <h3 className="card-title h5 fw-bold">
+                      {product.name}
+                    </h3>
+
+                    <p className="card-text text-secondary">
+                      {product.description}
+                    </p>
+
+                    <p className="small text-secondary mt-auto mb-0">
+                      Inventory quantity: {product.inventoryQuantity}
+                    </p>
+                  </div>
+                </article>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      <footer className="rentready-footer py-4">
+        <div className="container text-center">
+          <p className="mb-0">
+            RentReady · Equipment and dumpster rentals
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
