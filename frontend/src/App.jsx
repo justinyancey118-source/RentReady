@@ -2,32 +2,46 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const API_URL = "http://localhost:5000/api";
+
+function formatDuration(durationType, durationValue) {
+  const unit =
+    durationValue === 1 ? durationType : `${durationType}s`;
+
+  return `${durationValue} ${unit}`;
+}
+
 function App() {
   const [products, setProducts] = useState([]);
+  const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchCatalog() {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/products"
-        );
+        const [productsResponse, packagesResponse] = await Promise.all([
+          fetch(`${API_URL}/products`),
+          fetch(`${API_URL}/packages`),
+        ]);
 
-        if (!response.ok) {
-          throw new Error("Unable to load rental products.");
+        if (!productsResponse.ok || !packagesResponse.ok) {
+          throw new Error("Unable to load the rental catalog.");
         }
 
-        const data = await response.json();
-        setProducts(data.products);
+        const productsData = await productsResponse.json();
+        const packagesData = await packagesResponse.json();
+
+        setProducts(productsData.products);
+        setPackages(packagesData.packages);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Something went wrong loading rentals.");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchProducts();
+    fetchCatalog();
   }, []);
 
   return (
@@ -39,7 +53,7 @@ function App() {
           </a>
 
           <span className="navbar-text text-white">
-            Equipment & Dumpster Rentals
+            Equipment &amp; Dumpster Rentals
           </span>
         </div>
       </nav>
@@ -83,7 +97,7 @@ function App() {
         {loading && (
           <div className="text-center py-5" role="status">
             <div className="spinner-border text-success" />
-            <p className="mt-3">Loading rental products...</p>
+            <p className="mt-3">Loading rental products and prices...</p>
           </div>
         )}
 
@@ -101,35 +115,80 @@ function App() {
 
         {!loading && !error && products.length > 0 && (
           <div className="row g-4">
-            {products.map((product) => (
-              <div className="col-12 col-md-6 col-lg-4" key={product._id}>
-                <article className="card h-100 shadow-sm rental-card">
-                  <div className="rental-image-placeholder">
-                    <span aria-hidden="true">
-                      {product.category === "dumpster" ? "🗑️" : "🛠️"}
-                    </span>
-                  </div>
+            {products.map((product) => {
+              const productPackages = packages.filter(
+                (rentalPackage) =>
+                  rentalPackage.productId?._id === product._id
+              );
 
-                  <div className="card-body d-flex flex-column">
-                    <span className="badge text-bg-success align-self-start mb-2">
-                      {product.category}
-                    </span>
+              return (
+                <div
+                  className="col-12 col-md-6 col-lg-4"
+                  key={product._id}
+                >
+                  <article className="card h-100 shadow-sm rental-card">
+                    <div className="rental-image-placeholder">
+                      <span aria-hidden="true">
+                        {product.category === "dumpster"
+                          ? "Dumpster"
+                          : "Equipment"}
+                      </span>
+                    </div>
 
-                    <h3 className="card-title h5 fw-bold">
-                      {product.name}
-                    </h3>
+                    <div className="card-body d-flex flex-column">
+                      <span className="badge text-bg-success align-self-start mb-2">
+                        {product.category}
+                      </span>
 
-                    <p className="card-text text-secondary">
-                      {product.description}
-                    </p>
+                      <h3 className="card-title h5 fw-bold">
+                        {product.name}
+                      </h3>
 
-                    <p className="small text-secondary mt-auto mb-0">
-                      Inventory quantity: {product.inventoryQuantity}
-                    </p>
-                  </div>
-                </article>
-              </div>
-            ))}
+                      <p className="card-text text-secondary">
+                        {product.description}
+                      </p>
+
+                      <div className="mt-2">
+                        <h4 className="h6 fw-bold">Rental options</h4>
+
+                        {productPackages.length > 0 ? (
+                          <ul className="list-group list-group-flush mb-3">
+                            {productPackages.map((rentalPackage) => (
+                              <li
+                                className="list-group-item px-0 d-flex justify-content-between align-items-center gap-2"
+                                key={rentalPackage._id}
+                              >
+                                <span>
+                                  {formatDuration(
+                                    rentalPackage.durationType,
+                                    rentalPackage.durationValue
+                                  )}
+                                </span>
+
+                                <strong>
+                                  {new Intl.NumberFormat("en-US", {
+                                    style: "currency",
+                                    currency: "USD",
+                                  }).format(rentalPackage.price)}
+                                </strong>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="small text-secondary">
+                            No rental packages available yet.
+                          </p>
+                        )}
+                      </div>
+
+                      <p className="small text-secondary mt-auto mb-0">
+                        Inventory quantity: {product.inventoryQuantity}
+                      </p>
+                    </div>
+                  </article>
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
@@ -137,7 +196,7 @@ function App() {
       <footer className="rentready-footer py-4">
         <div className="container text-center">
           <p className="mb-0">
-            RentReady · Equipment and dumpster rentals
+            RentReady &middot; Equipment and dumpster rentals
           </p>
         </div>
       </footer>
