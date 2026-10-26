@@ -3,6 +3,12 @@ const mongoose = require("mongoose");
 
 const rentalBookingSchema = new mongoose.Schema(
   {
+        customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CustomerUser",
+      default: null,
+      index: true,
+    },
     customerName: {
       type: String,
       required: [true, "Customer name is required"],
@@ -158,5 +164,6 @@ const rentalBookingSchema = new mongoose.Schema(
 
 rentalBookingSchema.index({ customerEmail: 1, createdAt: -1 });
 rentalBookingSchema.index({ status: 1, createdAt: 1 });
+rentalBookingSchema.index({ customerId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("RentalBooking", rentalBookingSchema);
