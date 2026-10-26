@@ -58,10 +58,17 @@ Return an empty array if nothing is suitable.
 Respond using valid JSON only:
 {"recommendations":[{"id":"catalog product id","reason":"brief explanation"}]}
       `,
-      input: JSON.stringify({
+input: [
+  {
+    role: "user",
+    content:
+      "Return your rental recommendations as valid JSON only.\n" +
+      JSON.stringify({
         projectDescription: projectDescription.trim(),
         catalog,
       }),
+  },
+],
       text: {
         format: { type: "json_object" },
       },
