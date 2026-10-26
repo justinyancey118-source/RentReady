@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import RentalProductImage from "./components/RentalProductImage";
 import { getCurrentCustomer, logoutCustomer, getCustomerToken } from "./services/customerAuth";
+import AIRecommendations from "./components/AIRecommendations";
 
 import {
   getProducts,
@@ -253,6 +254,20 @@ function App() {
       </header>
 
       <main className="container py-5">
+        <AIRecommendations
+  onSelectProduct={(productId) => {
+    setSelectedProductId(productId);
+    setSelectedPackageId("");
+    setStartDate("");
+    setEndDate("");
+    setBookingError("");
+    setBookingSuccess(null);
+
+    document
+      .getElementById("booking")
+      ?.scrollIntoView({ behavior: "smooth" });
+  }}
+/>
         <section id="rentals" className="mb-5">
           <div className="mb-4">
             <p className="text-uppercase fw-semibold text-success mb-1">

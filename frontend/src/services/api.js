@@ -76,3 +76,14 @@ export function cancelMyBooking(bookingId) {
     true
   );
 }
+export function getAIRecommendations(projectDescription) {
+  return request(
+    "/recommendations",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectDescription }),
+    },
+    true
+  );
+}
