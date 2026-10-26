@@ -6,6 +6,7 @@ const productRoutes = require("./routes/productRoutes");
 const packageRoutes = require("./routes/packageRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const authRoutes = require("./routes/authRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes");
 
 const connectDB = require("./config/db");
 
@@ -18,6 +19,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
